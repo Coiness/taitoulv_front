@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useState } from "react";
+import Captcha from "react-captcha-code";
 import '@/globals.css'
+import { canvasRefProps } from "react-captcha-code/build/types/captcha";
 
 export default function AuthPage() {
     const [model, setModel] = useState<"login" | "register" | "forget">("login");
@@ -13,6 +15,9 @@ export default function AuthPage() {
     const [rule2, setRule2] = useState<boolean>(false);
     const [rule3, setRule3] = useState<boolean>(false);
     const [rememberPassword, setRememberPassword] = useState<boolean>(false);
+    const [captchaValue,setCaptchaValue] = useState<string>("");
+    const [userCaptcha,setUserCaptcha] = useState<string>("");
+    const captchaRef = React.useRef<canvasRefProps>(null);
 
     //实现实时验证密码匹配
     useEffect(() => {
@@ -20,6 +25,36 @@ export default function AuthPage() {
         setRule2(/^(?=.*[a-zA-Z])(?=.*\d)/.test(password));
         setRule3(password === confirmPassword && password !== "");
     }, [password, confirmPassword]);
+
+    //验证码处理函数
+    const handleCaptchaChange = useCallback((captcha:string)=>{
+        setCaptchaValue(captcha);
+    },[]);
+
+    async function login(){
+        if (useremail === "" || password === "") {
+            alert("请输入邮箱和密码");
+            return;
+        }
+        
+        if(userCaptcha.toLocaleLowerCase() !== captchaValue.toLowerCase()){
+            alert("验证码错误");
+            return;
+        }
+
+        try{
+            const res = await Login(useremail,password)
+            if(res.status === 200){
+                alert("登录成功");
+                window.location.href = "/";
+            }else{
+               alert("登录失败，请检查邮箱和密码");
+            }
+        }catch(err){
+            console.error(err);
+            alert("登录失败，请稍后再试");
+        }
+    }
 
     return (
         <div className="min-h-screen min-w-7 overflow-hidden bg-gray-50 flex items-center justify-center py-12 px-8 sm:px-6 lg:px-8">
@@ -168,6 +203,22 @@ export default function AuthPage() {
                                         </span>
                                         <span className="text-sm text-gray-700">两次密码输入必须相同</span>
                                     </div>
+                                </div>
+                                <div className="mt-4">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-2/3">
+                                      <input
+                                        type="text"
+                                        value={userCaptcha}
+                                        onChange={(e) => setUserCaptcha(e.target.value)}
+                                        className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="请输入验证码"
+                                      />
+                                    </div>
+                                    <div className="w-1/3 h-12 flex items-center justify-center cursor-pointer" onClick={() => captchaRef.current?.refresh()}>
+                                      <Captcha ref={captchaRef} charNum={4} onChange={handleCaptchaChange} />
+                                    </div>
+                                  </div>
                                 </div>
                             </div>
 
