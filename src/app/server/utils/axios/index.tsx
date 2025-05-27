@@ -1,4 +1,4 @@
-import axios ,{AxiosError,AxiosRequestConfig,AxiosResponse}from 'axios';
+import axios ,{AxiosError,AxiosResponse}from 'axios';
 import { baseURL } from '../../config';
 
 const instance = axios.create({
@@ -101,3 +101,4 @@ export const createCancelToken = () => {
     }
 }
 
+export default instance;
