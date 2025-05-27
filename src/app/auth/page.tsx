@@ -5,6 +5,7 @@ import { useState } from "react";
 import Captcha from "react-captcha-code";
 import '@/globals.css'
 import { canvasRefProps } from "react-captcha-code/build/types/captcha";
+import { AuthAPI } from "../server/apis/AuthAPI";
 
 export default function AuthPage() {
     const [model, setModel] = useState<"login" | "register" | "forget">("login");
@@ -31,30 +32,39 @@ export default function AuthPage() {
         setCaptchaValue(captcha);
     },[]);
 
-    async function login(){
-        if (useremail === "" || password === "") {
-            alert("请输入邮箱和密码");
-            return;
+async function Login(useremail: string, password: string) {
+    if (useremail === "" || password === "") {
+        alert("请输入邮箱和密码");
+        return;
+    }
+    
+    if(userCaptcha.toLowerCase() !== captchaValue.toLowerCase()){
+        alert("验证码错误");
+        return;
+    }
+
+    try {
+        // 使用 await 一次性获取结果
+        const response = await AuthAPI.login(useremail, password);
+        
+        console.log("登录成功", response);
+        const token = response.data.token;
+        
+        // 保存令牌（假设令牌在返回数据中）
+        if (rememberPassword && token) {
+            localStorage.setItem('token', token);
         }
         
-        if(userCaptcha.toLocaleLowerCase() !== captchaValue.toLowerCase()){
-            alert("验证码错误");
-            return;
-        }
-
-        try{
-            const res = await Login(useremail,password)
-            if(res.status === 200){
-                alert("登录成功");
-                window.location.href = "/";
-            }else{
-               alert("登录失败，请检查邮箱和密码");
-            }
-        }catch(err){
-            console.error(err);
-            alert("登录失败，请稍后再试");
-        }
+        // 显示成功消息并重定向
+        alert("登录成功");
+        window.location.href = "/";
+    } catch (error) {
+        // 错误已在拦截器中处理，这里可以添加特定的组件级处理
+        console.error("登录组件中捕获到错误:", error);        
+        // 由于拦截器已经显示了错误消息，这里省略
+        // alert("登录失败，请稍后再试");
     }
+}
 
     return (
         <div className="min-h-screen min-w-7 overflow-hidden bg-gray-50 flex items-center justify-center py-12 px-8 sm:px-6 lg:px-8">
@@ -130,8 +140,7 @@ export default function AuthPage() {
                                             alert("请输入邮箱和密码");
                                             return;
                                         }
-                                        alert("登录成功");
-                                        window.location.href = "/";
+                                        Login(useremail, password);
                                     }}
                                     className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                 >

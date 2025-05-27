@@ -1,9 +1,10 @@
 import axios ,{AxiosError,AxiosResponse}from 'axios';
 import { baseURL } from '../../config';
+import { message } from 'antd';
 
 const instance = axios.create({
     baseURL: baseURL,
-    timeout: 10000,
+    timeout: 1000,
     headers:{
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -33,12 +34,22 @@ instance.interceptors.response.use(
         if (response.data && response.data.code === 200) {
             // 如果后端返回格式统一，可以在这里解构
             // 例如：{ code: 200, data: {...}, message: '' }
-            return response.data.data;
+            return response.data;
         }
         
         return response;
     },
     (error: AxiosError) => {
+        if(error.code === 'ECONNABORTED'){
+            window.alert("请求超时，请检查网络连接");
+            console.error('Request timeout:',error.message);
+            return Promise.reject(error);
+        }
+
+
+
+
+
         if (error.response) {
             // 处理 HTTP 状态码错误
             const status = error.response.status;
@@ -48,6 +59,7 @@ instance.interceptors.response.use(
                 case 401: // 未授权
                     // 清除认证信息
                     if (typeof window !== 'undefined') {
+                        window.alert("未登录");
                         localStorage.removeItem('token');
                         // 重定向到登录页
                         window.location.href = '/auth';
@@ -55,34 +67,31 @@ instance.interceptors.response.use(
                     break;
                     
                 case 403: // 禁止访问
+                    window.alert("禁止访问");
                     console.error('Access forbidden');
                     break;
                     
                 case 404: // 资源不存在
+                    window.alert("资源不存在");
                     console.error('Resource not found');
                     break;
                     
                 case 500: // 服务器错误
+                    window.alert("服务器错误");
                     console.error('Server error');
                     break;
                     
                 default:
+                    window.alert(`Error with status: ${status}`);
                     console.error(`Error with status: ${status}`);
             }
-            /*
-            // 可以集中显示错误信息
-            const errorMessage = error.response.data?.message || 'Something went wrong';
-            // 使用您的提示组件显示错误
-            // showToast(errorMessage, 'error');
-            console.error('Response error:', errorMessage);*/
+            
         } else if (error.request) {
             // 请求已发送但未收到响应
             console.error('No response received:', error.request);
-            // showToast('Network error, please check your connection', 'error');
         } else {
             // 请求配置出错
             console.error('Request error:', error.message);
-            // showToast('Request configuration error', 'error');
         }
         
         // 必须返回 Promise.reject 以便调用方可以继续处理错误
