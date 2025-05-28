@@ -11,6 +11,7 @@ export default function AuthPage() {
     const [model, setModel] = useState<"login" | "register" | "forget">("login");
     const [useremail, setUseremail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [userName, setUserName] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
     const [rule1, setRule1] = useState<boolean>(false);
     const [rule2, setRule2] = useState<boolean>(false);
@@ -43,6 +44,11 @@ async function Login(useremail: string, password: string) {
         return;
     }
 
+    if(!isValidEmail(useremail)) {
+        alert("请输入有效的邮箱地址");
+        return;
+    }
+
     try {
         // 使用 await 一次性获取结果
         const response = await AuthAPI.login(useremail, password);
@@ -66,6 +72,34 @@ async function Login(useremail: string, password: string) {
     }
 }
 
+async function Register(userName:string,email: string, password: string) {
+    if(userCaptcha.toLowerCase() !== captchaValue.toLowerCase()){
+        alert("验证码错误");
+        return;
+    }
+
+    if(!isValidEmail(email)) {
+        alert("请输入有效的邮箱地址");
+        return;
+    }
+
+    try{
+        console.log("注册请求", email, password);
+        const response = await AuthAPI.register(userName,email, password);
+        console.log("注册成功", response);
+        window.location.href = "/";
+    }catch (error) {
+        // 错误已在拦截器中处理，这里可以添加特定的组件级处理
+        console.error("注册组件中捕获到错误:", error);
+        // 由于拦截器已经显示了错误消息，这里省略
+        // alert("注册失败，请稍后再试");
+    }
+}
+
+function isValidEmail(email:string):boolean{
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
     return (
         <div className="min-h-screen min-w-7 overflow-hidden bg-gray-50 flex items-center justify-center py-12 px-8 sm:px-6 lg:px-8">
             <div className="max-w-7xl w-full flex rounded-xl shadow-lg overflow-hidden">
@@ -112,6 +146,22 @@ async function Login(useremail: string, password: string) {
                                     />
                                 </div>
                             </div>
+                            <div className="mt-4">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-2/3">
+                                      <input
+                                        type="text"
+                                        value={userCaptcha}
+                                        onChange={(e) => setUserCaptcha(e.target.value)}
+                                        className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="请输入验证码"
+                                      />
+                                    </div>
+                                    <div className="w-1/3 h-12 flex items-center justify-center cursor-pointer" onClick={() => captchaRef.current?.refresh()}>
+                                      <Captcha ref={captchaRef} charNum={4} onChange={handleCaptchaChange} />
+                                    </div>
+                                  </div>
+                                </div>
 
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
@@ -166,6 +216,15 @@ async function Login(useremail: string, password: string) {
                                 <p className="text-sm text-gray-500">创建一个新账号，开始使用系统</p>
                             </div>
                             <div className="space-y-4">
+                            <div>
+                                <input
+                                    type="text"
+                                    value={userName}
+                                    onChange={(e) => setUserName(e.target.value)}
+                                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="用户名"
+                                />
+                        </div>
                                 <div>
                                     <input
                                         type="email"
@@ -235,8 +294,7 @@ async function Login(useremail: string, password: string) {
                                 <button
                                     onClick={() => {
                                         if (rule1 && rule2 && rule3) {
-                                            alert("注册成功");
-                                            setModel("login");
+                                            Register(userName,useremail, password);
                                         } else {
                                             alert("请检查密码规则");
                                         }

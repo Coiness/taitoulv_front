@@ -11,25 +11,33 @@ const instance = axios.create({
 })
 
 instance.interceptors.request.use(
-    (config)=>{
+    (config) => {
         const token = localStorage.getItem('token');
         if(token){
-            config.headers = config.headers|| {};
+            config.headers = config.headers || {};
             config.headers['Authorization'] = `Bearer ${token}`;
         }
 
-        //转换请求数据格式
-        if(config.data && config.method !== 'get'){
+        // 确保明确设置内容类型
+        if (config.method !== 'get') {
+            config.headers = config.headers || {};
+            config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        }
+
+        // 转换请求数据为表单格式
+        if (config.data && config.method !== 'get') {
+            console.log("转换格式前的数据:", config.data);
             const formData = new URLSearchParams();
-            for(const key in config.data){
+            for (const key in config.data) {
                 formData.append(key, config.data[key]);
             }
             config.data = formData;
+            console.log("转换格式后的数据:", config.data.toString());
         }
 
         return config;
     },
-    error =>{
+    error => {
         console.error('Request error:', error);
         return Promise.reject(error);
     }
