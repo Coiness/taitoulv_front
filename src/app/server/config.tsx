@@ -1,2 +1,2 @@
-export const baseURL = 'https://api.openai.com/v1/';
+export const baseURL = 'http://localhost:3001/api';
 

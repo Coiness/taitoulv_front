@@ -1,12 +1,11 @@
 import axios ,{AxiosError,AxiosResponse}from 'axios';
 import { baseURL } from '../../config';
-import { message } from 'antd';
 
 const instance = axios.create({
     baseURL: baseURL,
     timeout: 1000,
     headers:{
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
     }
 })
@@ -17,6 +16,15 @@ instance.interceptors.request.use(
         if(token){
             config.headers = config.headers|| {};
             config.headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        //转换请求数据格式
+        if(config.data && config.method !== 'get'){
+            const formData = new URLSearchParams();
+            for(const key in config.data){
+                formData.append(key, config.data[key]);
+            }
+            config.data = formData;
         }
 
         return config;
@@ -59,7 +67,7 @@ instance.interceptors.response.use(
                 case 401: // 未授权
                     // 清除认证信息
                     if (typeof window !== 'undefined') {
-                        window.alert("未登录");
+                        window.alert("用户名或密码错误");
                         localStorage.removeItem('token');
                         // 重定向到登录页
                         window.location.href = '/auth';
