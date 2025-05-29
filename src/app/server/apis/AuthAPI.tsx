@@ -23,7 +23,6 @@ export const AuthAPI = {
 
     //退出登录
     logout:()=>{
-        localStorage.removeItem('token');
         return instance.post('/auth/logout');
     }
 

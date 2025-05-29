@@ -21,6 +21,26 @@ export default function AuthPage() {
     const [userCaptcha,setUserCaptcha] = useState<string>("");
     const captchaRef = React.useRef<canvasRefProps>(null);
 
+    // 初始化状态
+    useEffect(()=>{
+        if(typeof window !== 'undefined') {
+            const storedEmail = localStorage.getItem('email');
+            const storedPassword = localStorage.getItem('password');
+            const authMode = localStorage.getItem('authMode');
+            if( storedEmail) {
+                setUseremail(storedEmail);
+            }
+            if(storedPassword) {
+                setPassword(storedPassword);
+            }
+            if(authMode === 'passwordChange'){
+                setModel('forget');
+                localStorage.removeItem('authMode');
+                setPassword("");
+            }
+        }
+    },[]);
+
     //实现实时验证密码匹配
     useEffect(() => {
         setRule1(password.length >= 8 && password.length <= 16);
@@ -33,73 +53,81 @@ export default function AuthPage() {
         setCaptchaValue(captcha);
     },[]);
 
-async function Login(useremail: string, password: string) {
-    if (useremail === "" || password === "") {
-        alert("请输入邮箱和密码");
-        return;
-    }
-    
-    if(userCaptcha.toLowerCase() !== captchaValue.toLowerCase()){
-        alert("验证码错误");
-        return;
-    }
-
-    if(!isValidEmail(useremail)) {
-        alert("请输入有效的邮箱地址");
-        return;
-    }
-
-    try {
-        // 使用 await 一次性获取结果
-        const response = await AuthAPI.login(useremail, password);
-        
-        console.log("登录成功", response);
-        const token = response.data.token;
-        
-        // 保存令牌（假设令牌在返回数据中）
-        if (rememberPassword && token) {
-            localStorage.setItem('token', token);
+    async function Login(useremail: string, password: string) {
+        if (useremail === "" || password === "") {
+            alert("请输入邮箱和密码");
+            return;
         }
         
-        // 显示成功消息并重定向
-        alert("登录成功");
-        window.location.href = "/";
-    } catch (error) {
-        // 错误已在拦截器中处理，这里可以添加特定的组件级处理
-        console.error("登录组件中捕获到错误:", error);        
-        // 由于拦截器已经显示了错误消息，这里省略
-        // alert("登录失败，请稍后再试");
-    }
-}
+        if(userCaptcha.toLowerCase() !== captchaValue.toLowerCase()){
+            alert("验证码错误");
+            return;
+        }
 
-async function Register(userName:string,email: string, password: string) {
-    if(userCaptcha.toLowerCase() !== captchaValue.toLowerCase()){
-        alert("验证码错误");
-        return;
+        if(!isValidEmail(useremail)) {
+            alert("请输入有效的邮箱地址");
+            return;
+        }
+
+        try {
+            // 使用 await 一次性获取结果
+            const response = await AuthAPI.login(useremail, password);
+            
+            console.log("登录成功", response);
+            const token = response.data.token;
+            localStorage.setItem('useremail', useremail);
+            
+            // 保存令牌（假设令牌在返回数据中）
+            if (rememberPassword && token) {
+                localStorage.setItem('token', token);
+                localStorage.setItem('password', password);
+            }
+            
+            // 显示成功消息并重定向
+            alert("登录成功");
+            window.location.href = "/";
+        } catch (error) {
+            // 错误已在拦截器中处理，这里可以添加特定的组件级处理
+            console.error("登录组件中捕获到错误:", error);   
+            localStorage.setItem('email', useremail); // 保存邮箱
+            localStorage.removeItem('token'); // 清除可能的错误令牌
+            localStorage.removeItem('password'); // 清除可能的错误密码     
+            // 由于拦截器已经显示了错误消息，这里省略
+            // alert("登录失败，请稍后再试");
+        }
     }
 
-    if(!isValidEmail(email)) {
-        alert("请输入有效的邮箱地址");
-        return;
+    async function Register(userName:string,email: string, password: string) {
+        if(userCaptcha.toLowerCase() !== captchaValue.toLowerCase()){
+            alert("验证码错误");
+            return;
+        }
+
+        if(!isValidEmail(email)) {
+            alert("请输入有效的邮箱地址");
+            return;
+        }
+
+        try{
+            console.log("注册请求", email, password);
+            const response = await AuthAPI.register(userName,email, password);
+            localStorage.setItem('email', email);
+            localStorage.setItem('username', userName);
+            console.log("注册成功", response);
+            window.location.href = "/";
+        }catch (error) {
+            // 错误已在拦截器中处理，这里可以添加特定的组件级处理
+            console.error("注册组件中捕获到错误:", error);
+            // 由于拦截器已经显示了错误消息，这里省略
+            // alert("注册失败，请稍后再试");
+        }
     }
 
-    try{
-        console.log("注册请求", email, password);
-        const response = await AuthAPI.register(userName,email, password);
-        console.log("注册成功", response);
-        window.location.href = "/";
-    }catch (error) {
-        // 错误已在拦截器中处理，这里可以添加特定的组件级处理
-        console.error("注册组件中捕获到错误:", error);
-        // 由于拦截器已经显示了错误消息，这里省略
-        // alert("注册失败，请稍后再试");
+    function isValidEmail(email:string):boolean{
+       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+       return emailRegex.test(email);
     }
-}
-
-function isValidEmail(email:string):boolean{
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
+    
     return (
         <div className="min-h-screen min-w-7 overflow-hidden bg-gray-50 flex items-center justify-center py-12 px-8 sm:px-6 lg:px-8">
             <div className="max-w-7xl w-full flex rounded-xl shadow-lg overflow-hidden">
