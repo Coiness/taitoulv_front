@@ -40,8 +40,7 @@ export default function VideosPage() {
         addLog("正在建立连接...");
         const token = localStorage.getItem('token');
         // 根据你的后端 WebSocket URL 进行调整
-        const wsUrl = `ws://localhost:8000/stream?token=${token}`;
-        
+        const wsUrl = `ws://localhost:3001/api/video/stream?token=${token}`;
         wsRef.current = new WebSocket(wsUrl);
         
         wsRef.current.onopen = () => {
@@ -74,6 +73,7 @@ export default function VideosPage() {
         };
         
         wsRef.current.onerror = (e) => {
+            console.log(e);
             setError("WebSocket 连接错误");
             addLog("WebSocket 错误");
             setConnected(false);

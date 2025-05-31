@@ -4,11 +4,16 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import UserCard from "./card";
 import '@/globals.css'
+import { AuthAPI } from '@/app/server/apis/AuthAPI';
+import { useRouter } from 'next/navigation';
+
 
 export default function TopMenus() {
     const [showUserCard, setShowUserCard] = useState(false);
     const [username, setUsername] = useState("用户");
     const [email, setEmail] = useState("user@example.com");
+    const router = useRouter();
+    
 
     // 组件加载时从 localStorage 获取用户信息
     useEffect(() => {
@@ -30,6 +35,32 @@ export default function TopMenus() {
             }
         }
     }, []);
+
+    // 处理退出登录
+    const handleLogout = async () => {
+        if(!localStorage.getItem('token')){
+            window.alert("退出登录失败，请稍后再试");
+            return
+        }
+
+
+        try {
+            await AuthAPI.logout();
+            localStorage.removeItem('token');
+            localStorage.setItem('username', '');
+            localStorage.setItem('email','');
+            localStorage.setItem('password','');
+            setUsername("用户");
+            setEmail("user@example.com")
+        // 重定向到登录页
+        router.push('/auth');
+        } catch (error) {
+            window.alert("退出登录失败，请稍后再试");
+        console.error('退出登录失败', error);
+        }
+    };
+
+
 
     return(
         <div className="bg-white shadow-md fixed top-0 left-0 right-0 z-50 w-full">
@@ -74,6 +105,7 @@ export default function TopMenus() {
                                     email={email}
                                     isVisible={showUserCard}
                                     onClose={() => setShowUserCard(false)}
+                                    handleLogout={handleLogout}
                                 />
                             )}
                         </div>

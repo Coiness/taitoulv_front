@@ -11,11 +11,6 @@ export const AuthAPI = {
         return instance.post('/auth/public/register', {username,email, password});
     },
 
-    // 更改密码
-    password_change: (email:string ,password_old:string,password_new:string) => {
-        return instance.put('/auth/user', {email,password_new,password_old});
-    },
-
     //忘记密码
     password_forgot: (email:string,password_new:string) => {
         return instance.post('/auth/public/forgot', {email,password_new});

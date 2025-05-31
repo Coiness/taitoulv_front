@@ -51,7 +51,7 @@ export default function Profile() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-50 py-28 px-4 sm:px-6 lg:px-8 ">
             <div className="max-w-3xl mx-auto">
                 <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                     <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
@@ -101,17 +101,7 @@ export default function Profile() {
                                 </dd>
                             </div>
                             
-                            {/* 账户创建时间 - 可选 */}
-                            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">
-                                    账户状态
-                                </dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        已激活
-                                    </span>
-                                </dd>
-                            </div>
+                            
                         </dl>
                     </div>
                 </div>

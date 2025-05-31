@@ -2,18 +2,16 @@
 
 import React, {  useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { AuthAPI } from '@/app/server/apis/AuthAPI';
 
 interface UserCardProps {
     username: string;
     email: string;
     isVisible: boolean;
     onClose: () => void;
+    handleLogout: () => void;
 }
 
-export default function UserCard({ username, email, isVisible, onClose }: UserCardProps) {
-    const router = useRouter();
+export default function UserCard({ username, email, isVisible, onClose ,handleLogout}: UserCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
     
     // 处理点击外部关闭卡片
@@ -33,27 +31,7 @@ export default function UserCard({ username, email, isVisible, onClose }: UserCa
         };
     }, [isVisible, onClose]);
     
-    // 处理退出登录
-    const handleLogout = async () => {
-        if(!localStorage.getItem('token')){
-            window.alert("退出登录失败，请稍后再试");
-            return
-        }
-
-
-        try {
-            await AuthAPI.logout();
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            localStorage.removeItem('email');
-            localStorage.removeItem('password');
-        // 重定向到登录页
-        router.push('/auth');
-        } catch (error) {
-            window.alert("退出登录失败，请稍后再试");
-        console.error('退出登录失败', error);
-        }
-    };
+    
     
     if (!isVisible) return null;
     
