@@ -80,7 +80,7 @@ export default function TopMenus() {
                         <Link href="/" className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             首页
                         </Link>
-                        <Link href="/dashboard/videos" className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <Link href="/videos" className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             视频检测
                         </Link>
                        

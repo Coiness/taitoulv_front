@@ -13,6 +13,8 @@ export default function VideosPage() {
     const [logs, setLogs] = useState<string[]>([]);
     const wsRef = useRef<WebSocket | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    // 新增：存储后端返回的可视化图像
+    const [visualizationImage, setVisualizationImage] = useState<string | null>(null);
 
     // 处理认证和初始化
     useEffect(() => {
@@ -24,7 +26,6 @@ export default function VideosPage() {
                 router.push('/auth');
                 return;
             }
-
             // 初始化连接
             initializeWebSocket();
         }
@@ -39,7 +40,6 @@ export default function VideosPage() {
     const initializeWebSocket = () => {
         addLog("正在建立连接...");
         const token = localStorage.getItem('token');
-        // 根据你的后端 WebSocket URL 进行调整
         const wsUrl = `ws://localhost:3001/api/video/stream?token=${token}`;
         wsRef.current = new WebSocket(wsUrl);
         
@@ -52,10 +52,17 @@ export default function VideosPage() {
         
         wsRef.current.onmessage = (event) => {
             try {
+                console.log("Received message:", event.data);
                 const data = JSON.parse(event.data);
                 if (data.head_up_rate !== undefined) {
                     setHeadUpRate(data.head_up_rate);
-                    addLog(`收到抬头率: ${(data.head_up_rate * 100).toFixed(2)}%`);
+                }
+                // 新增：处理后端返回的可视化图像
+                addLog(`visualization data received $data.visualization$`);
+                console.log("visualization",data.visualization );
+                if (data.visualization) {
+                    setVisualizationImage(data.visualization);
+                    addLog("接收到可视化结果");
                 }
                 if (data.error) {
                     setError(data.error);
@@ -120,7 +127,7 @@ export default function VideosPage() {
         // 设置定时发送视频帧
         const intervalId = setInterval(() => {
             captureAndSendFrame();
-        }, 1000); // 每秒发送一帧
+        }, 100); // 每秒发送一帧
         
         // 保存 intervalId 以便后续清理
         window.sessionStorage.setItem('frameInterval', intervalId.toString());
@@ -134,6 +141,7 @@ export default function VideosPage() {
             window.sessionStorage.removeItem('frameInterval');
         }
         setProcessing(false);
+        setVisualizationImage(null); // 清除可视化图像
         addLog("已停止检测");
     };
 
@@ -219,16 +227,21 @@ export default function VideosPage() {
             )}
             
             <div className="flex flex-col lg:flex-row gap-6">
-                {/* 左侧：视频和控制 */}
+                {/* 左侧：可视化图像和控制 */}
                 <div className="lg:w-2/3">
                     <div className="bg-black rounded-lg overflow-hidden relative">
-                        {/* 视频显示 */}
-                        <video 
-                            ref={videoRef} 
-                            className="w-full h-auto"
-                            playsInline
-                            muted
-                        ></video>
+                        {/* 显示后端返回的可视化图像 */}
+                        {visualizationImage ? (
+                            <img 
+                                src={`data:image/jpeg;base64,${visualizationImage}`} 
+                                className="w-full h-auto"
+                                alt="检测结果"
+                            />
+                        ) : (
+                            <div className="bg-gray-800 w-full aspect-video flex items-center justify-center text-white">
+                                {processing ? '正在处理...' : '等待开始检测'}
+                            </div>
+                        )}
                         
                         {/* 抬头率显示 */}
                         {headUpRate !== null && (
@@ -268,7 +281,7 @@ export default function VideosPage() {
                 {/* 右侧：日志和信息 */}
                 <div className="lg:w-1/3 bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <h2 className="text-lg font-semibold mb-2">操作日志</h2>
-                    <div className="h-64 overflow-y-auto text-sm bg-white p-3 rounded border border-gray-200">
+                    <div className="h-32 overflow-y-auto text-sm bg-white p-3 rounded border border-gray-200">
                         {logs.map((log, index) => (
                             <div key={index} className="mb-1">
                                 {log}
@@ -283,10 +296,23 @@ export default function VideosPage() {
                         <h3 className="font-medium mb-2">使用说明</h3>
                         <ul className="list-disc pl-5 text-sm text-gray-600">
                             <li>请确保您已允许浏览器访问摄像头</li>
-                            <li>点击“开始检测”按钮开始分析抬头率</li>
+                            <li>点击“开始检测“”按钮开始分析抬头率</li>
                             <li>检测过程中，请保持面部在摄像头视野内</li>
                             <li>系统会实时显示您的抬头率数据</li>
                         </ul>
+                    </div>
+                    
+                    {/* 摄像头视频移到这里 */}
+                    <div className="mt-4">
+                        <h3 className="font-medium mb-2">摄像头预览</h3>
+                        <div className="bg-black rounded-lg overflow-hidden">
+                            <video 
+                                ref={videoRef} 
+                                className="w-full h-auto"
+                                playsInline
+                                muted
+                            ></video>
+                        </div>
                     </div>
                 </div>
             </div>

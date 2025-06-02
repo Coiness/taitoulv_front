@@ -33,7 +33,7 @@ export default function Home() {
                             系统这一块
                         </p>
                         <div className="mt-10">
-                            <Link href="/dashboard/videos" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-indigo-600 bg-white hover:bg-indigo-50">
+                            <Link href="/videos" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-indigo-600 bg-white hover:bg-indigo-50">
                                 开始检测
                             </Link>
                         </div>
@@ -64,7 +64,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <div className="mt-6">
-                                    <Link href="/dashboard/videos" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                                    <Link href="/videos" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
                                         立即使用
                                     </Link>
                                 </div>
@@ -88,7 +88,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <div className="mt-6">
-                                    <Link href="/dashboard" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                                    <Link href="/picture" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
                                         查看报告
                                     </Link>
                                 </div>
@@ -107,12 +107,12 @@ export default function Home() {
                                     <div className="ml-4">
                                         <h3 className="text-lg font-medium text-gray-900">个人中心</h3>
                                         <p className="mt-2 text-base text-gray-500">
-                                            这一块
+                                            个人信息这一块
                                         </p>
                                     </div>
                                 </div>
                                 <div className="mt-6">
-                                    <Link href="/dashboard/profile" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                                    <Link href="/profile" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
                                         进入中心
                                     </Link>
                                 </div>
