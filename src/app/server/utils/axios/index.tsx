@@ -3,7 +3,7 @@ import { baseURL } from '../../config';
 
 const instance = axios.create({
     baseURL: baseURL,
-    timeout: 1000,
+    timeout: 10000,
     headers:{
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
@@ -18,13 +18,22 @@ instance.interceptors.request.use(
             config.headers['Authorization'] = `Bearer ${token}`;
         }
 
-        // 确保明确设置内容类型
+        // 检查是否是FormData对象 - 文件上传使用FormData
+        if (config.data instanceof FormData) {
+            // 对于FormData，确保使用正确的Content-Type
+            config.headers = config.headers || {};
+            config.headers['Content-Type'] = 'multipart/form-data';
+            // 不对FormData做任何转换
+            return config;
+        }
+
+        // 对非FormData对象的处理
         if (config.method !== 'get') {
             config.headers = config.headers || {};
             config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
 
-        // 转换请求数据为表单格式
+        // 转换非FormData请求数据为表单格式
         if (config.data && config.method !== 'get') {
             console.log("转换格式前的数据:", config.data);
             const formData = new URLSearchParams();
